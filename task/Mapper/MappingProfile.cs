@@ -15,6 +15,7 @@ namespace task.Mapper
             CreateMap<Role, CreateRoleDto>().ReverseMap();
             CreateMap<CreateUser, CreateUserDto>().ReverseMap();
             CreateMap<Criteria, CriteriaDto>().ReverseMap();
+            CreateMap<Auth, AuthDto>().ReverseMap();
         }
     }
 }

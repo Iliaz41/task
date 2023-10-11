@@ -20,6 +20,10 @@ namespace task.Models
         [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
         public string Email { get; set; }
 
+        [Required]
+        [MinLength(5)]
+        public string Password { get; set; }
+
         [JsonIgnore]
         public IList<Role>? Roles { get; set; } = new List<Role>();
     }

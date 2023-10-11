@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json.Nodes;
 using task.Dtos;
 using task.Exceptions;
 using task.Models;
@@ -25,6 +26,51 @@ namespace task.Services
             _roleService = roleService;
             _logger = logger;
             _configuration = configuration;
+        }
+
+        public async Task<string> Login(Auth entity)
+        {
+            var users = await _userRepository.GetAll();
+            var user = new User();
+            foreach(var i in users)
+            {
+                if (entity.Email == i.Email)
+                {
+                    user = i;
+                }
+
+            }
+            if (user == null)
+            {
+                throw new BadRequestException("User not found.");
+            }
+            if (!BCrypt.Net.BCrypt.Verify(entity.Password, user.Password))
+            {
+                throw new BadRequestException("Wrong password.");
+            }
+            string token = await CreateToken(entity);
+            var response = new JsonObject();
+            response.Add("accessToken", token);
+            response.Add("expTime", DateTime.Now);
+            response.Add("userId", user.Id);
+            return response.ToString();
+        }
+
+        public async Task<string> CreateToken(Auth entity)
+        {
+            List<Claim> claims = new List<Claim> {
+                new Claim(ClaimTypes.Email, entity.Email)
+            };
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                _configuration.GetSection("AppSettings:Token").Value!));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+            var token = new JwtSecurityToken(
+                    claims: claims,
+                    expires: DateTime.Now.AddDays(1),
+                    signingCredentials: creds
+                );
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+            return jwt;
         }
 
         public async Task<User> AddRole(long userId, long roleId)
@@ -51,8 +97,9 @@ namespace task.Services
             {
                 Name = entity.Name,
                 Age = entity.Age,
-                Email = entity.Email
-            };
+                Email = entity.Email,
+                Password = BCrypt.Net.BCrypt.HashPassword(entity.Password)
+        };
             var role = await _roleService.GetById(entity.RoleId);
             if (role == null)
             {

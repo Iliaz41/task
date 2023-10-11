@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using task.Models;
 
 namespace task.Dtos
@@ -15,6 +16,10 @@ namespace task.Dtos
         [Required]
         [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
         public string Email { get; set; }
+
+        [Required]
+        [MinLength(5)]
+        public string Password { get; set; }
 
         public long RoleId { get; set; }
     }
