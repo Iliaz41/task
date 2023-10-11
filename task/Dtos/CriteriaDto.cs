@@ -1,0 +1,11 @@
+﻿namespace task.Dtos
+{
+    public class CriteriaDto
+    {
+        public string? Name { get; set; }
+        public int? Age { get; set; }
+        public string? Email { get; set; }
+        public string? Status { get; set; }
+        public bool IsDesc { get; set; } = false;
+    }
+}
