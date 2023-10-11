@@ -13,5 +13,7 @@ namespace task.Services.IServices
         Task<User> RemoveRole(long userId, long roleId);
         Task<List<User>> SortByCriteria(int? page, Criteria criteria);
         Task<List<User>> FilterByCriteria(int? page, Criteria criteria);
+        Task<string> CreateToken(Auth entity);
+        Task<string> Login(Auth entity);
     }
 }

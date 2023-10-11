@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Nodes;
 using task.Dtos;
 using task.Exceptions;
 using task.Models;
@@ -24,6 +26,7 @@ namespace task.Controllers
         /// </summary>
         /// <param name="page"></param>
         /// <param name="criteria"></param>
+        [Authorize]
         [HttpGet]
         [Route("")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -37,6 +40,7 @@ namespace task.Controllers
         /// </summary>
         /// <param name="page"></param>
         /// <param name="criteria"></param>
+        [Authorize]
         [HttpGet]
         [Route("filter")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -49,6 +53,7 @@ namespace task.Controllers
         ///  Get user with specific id.
         /// </summary>
         /// <param name="id"></param>
+        [Authorize]
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -62,6 +67,7 @@ namespace task.Controllers
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="roleId"></param>
+        [Authorize]
         [HttpPost]
         [Route("{userId}/roles/{roleId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -75,6 +81,7 @@ namespace task.Controllers
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="roleId"></param>
+        [Authorize]
         [HttpDelete]
         [Route("{userId}/roles/{roleId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -87,6 +94,7 @@ namespace task.Controllers
         ///  Add new user.
         /// </summary>
         /// <param name="createUserDto"></param>
+        [Authorize]
         [HttpPost]
         [Route("")]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -101,6 +109,7 @@ namespace task.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <param name="userDto"></param>
+        [Authorize]
         [HttpPut]
         [Route("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -113,6 +122,7 @@ namespace task.Controllers
         ///  Delete user by id.
         /// </summary>
         /// <param name="id"></param>
+        [Authorize]
         [HttpDelete]
         [Route("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -120,6 +130,30 @@ namespace task.Controllers
         {
             await _userService.Delete(id);
             return NoContent();
+        }
+
+        /// <summary>
+        ///  Register new user.
+        /// </summary>
+        /// <param name="createUserDto"></param>
+        [HttpPost]
+        [Route("register")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public async Task<ActionResult<CreateUserDto>> Registration([FromBody] CreateUserDto createUserDto)
+        {
+            var userAdded = _mapper.Map<UserDto>(await _userService.Create(_mapper.Map<CreateUser>(createUserDto)));
+            return CreatedAtAction("GetById", new { id = userAdded.Id }, userAdded);
+        }
+
+        /// <summary>
+        ///  Login.
+        /// </summary>
+        /// <param name="authDto"></param>
+        [HttpPost]
+        [Route("LogIn")]
+        public async Task<ActionResult<string>> Login([FromBody] AuthDto authDto)
+        {
+            return Ok(await _userService.Login(_mapper.Map<Auth>(authDto)));
         }
     }
 }
